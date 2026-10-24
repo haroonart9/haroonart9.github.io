@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="theme-color" content="#4E3426">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="سجلّي">
+  <title>سجلّي</title>
+
+  <!-- ربط ملف التغليف Manifest افتراضياً عبر Data URI -->
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+    %22name%22: %22سجلّي%22,
+    %22short_name%22: %22سجلّي%22,
+    %22start_url%22: %22./index.html%22,
+    %22display%22: %22standalone%22,
+    %22background_color%22: %22%23EFE3D2%22,
+    %22theme_color%22: %22%236B4A35%22,
+    %22icons%22: [{
+      %22src%22: %22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230F1C26'/%3E%3Cpath d='M25 20 H60 L72 32 V80 H25 Z' fill='none' stroke='%23F5E6C8' stroke-width='6'/%3E%3Cline x1='35' y1='40' x2='58' y2='40' stroke='%23F5E6C8' stroke-width='5' stroke-linecap='round'/%3E%3Cline x1='35' y1='52' x2='58' y2='52' stroke='%23F5E6C8' stroke-width='5' stroke-linecap='round'/%3E%3Cline x1='35' y1='64' x2='50' y2='64' stroke='%23F5E6C8' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M48 72 L82 38 L89 45 L55 79 L44 82 Z' fill='%23D4A359'/%3E%3Ccircle cx='75' cy='75' r='10' fill='none' stroke='%23D4A359' stroke-width='5' stroke-dasharray='6 3'/%3E%3C/svg%3E%22,
+      %22sizes%22: %22192x192%22,
+      %22type%22: %22image/svg+xml%22
+    }]
+  }">
+
+  <!-- مكتبات التصدير والاستيراد (Image, PDF, Excel, Word, PDF.js) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <style>
+    :root {
+      --bg-cream: #EFE3D2;
+      --bg-card: #FAF3E8;
+      --bg-soft: #FDF9F3;
+      --brown-dark: #4E3426;
+      --brown-main: #6B4A35;
+      --caramel: #C6966B;
+      --caramel-light: #E6D2BC;
+      --text-dark: #3A261B;
+      --text-muted: #7A5F4E;
+      --border-warm: #D5BEA5;
+      --danger-red: #D32F2F;
+      --danger-bg: #FFEBEE;
+      --success-green: #2E7D32;
+      --whatsapp: #25D366;
+      --telegram: #0088CC;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-cream);
+      color: var(--text-dark);
+      min-height: 100vh;
+      padding: 6px;
+      overflow-x: hidden;
+    }
+
+    .app-wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      background: linear-gradient(180deg, #F5EBDD 0%, #EFE2CF 100%);
+      border-radius: 24px;
+      box-shadow: 0 8px 25px rgba(78, 52, 38, 0.18);
+      border: 2px solid var(--border-warm);
+      overflow: hidden;
+      min-height: 96vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ترويسة سجلّي */
+    .main-header {
+      text-align: center;
+      padding: 20px 14px 12px;
+      position: relative;
+      background: radial-gradient(circle at top left, rgba(107,74,53,0.12), transparent 55%);
+    }
+
+
+    .logo-circle {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 6px;
+      border-radius: 50%;
+      border: 2px solid var(--caramel);
+      background: rgba(255, 255, 255, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 15px rgba(198,150,107,0.2);
+    }
+
+    .logo-title {
+      font-family: 'Traditional Arabic', 'Amiri', 'Times New Roman', serif;
+      font-size: 52px;
+      font-weight: 900;
+      color: var(--brown-dark);
+      line-height: 1;
+    }
+
+    .logo-book-arc {
+      width: 110px;
+      height: 14px;
+      border-top: 3px solid var(--caramel);
+      border-radius: 50% 50% 0 0;
+      margin-top: 4px;
+    }
+
+    .teacher-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 8px auto 4px;
+      max-width: 360px;
+    }
+    .teacher-divider::before, .teacher-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--brown-main);
+      opacity: 0.5;
+    }
+    .teacher-name-text {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--brown-dark);
+      white-space: nowrap;
+    }
+    .school-sub-info {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+
+    /* شريط التنقل */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--caramel-light);
+      padding: 6px 10px;
+      border-top: 1px solid var(--border-warm);
+      border-bottom: 1px solid var(--border-warm);
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .nav-btn {
+      background: var(--brown-main);
+      color: #FFF;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .nav-btn.secondary { background: var(--caramel); color: var(--brown-dark); }
+    .zoom-controls { display: flex; align-items: center; gap: 4px; }
+    .zoom-btn {
+      background: #FFF; color: var(--brown-dark); border: 1px solid var(--brown-main);
+      width: 27px; height: 27px; border-radius: 50%; font-weight: bold; font-size: 14px; cursor: pointer;
+    }
+
+    .screen { display: none; padding: 12px 8px; flex: 1; }
+    .screen.active { display: block; }
+
+    /* شبكة الواجهة الرئيسية (3 بطاقات) */
+    .home-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 440px;
+      margin: 18px auto;
+      padding: 0 4px;
+    }
+    .arch-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-warm);
+      border-radius: 22px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(78, 52, 38, 0.12);
+      transition: transform 0.15s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .arch-card:active { transform: scale(0.96); }
+    .arch-card-top { padding: 18px 8px 14px; display: flex; align-items: center; justify-content: center; }
+    .arch-icon-circle {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: var(--brown-dark); color: var(--bg-cream);
+      display: flex; align-items: center; justify-content: center; font-size: 30px;
+      box-shadow: 0 4px 10px rgba(78,52,38,0.25);
+    }
+    .arch-card-bottom {
+      background: var(--brown-main); color: #FFF; text-align: center;
+      padding: 10px 4px 8px; border-radius: 16px 16px 0 0;
+    }
+    .arch-card-bottom h3 { font-size: 14px; font-weight: 800; margin-bottom: 2px; }
+    .arch-card-bottom span { font-size: 10px; color: var(--caramel-light); }
+
+    /* الحاويات والأزرار */
+    .card-box {
+      background: var(--bg-soft); border: 1px solid var(--border-warm);
+      border-radius: 16px; padding: 10px; margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(78, 52, 38, 0.06);
+    }
+    .section-title {
+      font-size: 14px; font-weight: 800; color: var(--brown-dark);
+      margin-bottom: 8px; padding-bottom: 5px; border-bottom: 2px solid var(--caramel);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;
+    }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 8px; margin-bottom: 8px; }
+    input[type="text"], input[type="number"], input[type="password"], select {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border-warm);
+      border-radius: 10px; background: #FFF; color: var(--text-dark); font-size: 13px; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--brown-main); }
+
+    .btn {
+      background: var(--brown-main); color: #FFF; border: none; padding: 8px 12px;
+      border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .btn-caramel { background: var(--caramel); color: var(--brown-dark); }
+    .btn-danger { background: var(--danger-red); color: #FFF; }
+    .btn-success { background: var(--success-green); color: #FFF; }
+    .btn-sm { padding: 5px 8px; font-size: 11px; border-radius: 8px; }
+
+    /* ستايل قائمة المشاركة المنسدلة */
+    .share-dropdown { position: relative; display: inline-block; }
+    .share-menu {
+      display: none; position: absolute; background-color: var(--bg-card);
+      min-width: 150px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 10;
+      border-radius: 12px; overflow: hidden; top: 110%; right: 0;
+      border: 1px solid var(--border-warm);
+    }
+    .share-menu.show { display: flex; flex-direction: column; }
+    .share-menu button {
+      background: none; border: none; padding: 10px 12px; text-align: right;
+      width: 100%; font-size: 12px; font-weight: bold; color: var(--brown-dark);
+      border-bottom: 1px solid var(--border-warm); cursor: pointer;
+    }
+    .share-menu button:last-child { border-bottom: none; }
+    .share-menu button:hover { background-color: var(--caramel-light); }
+    .share-menu-left { right: auto; left: 0; }
+
+    .tools-ribbon {
+      display: flex; flex-wrap: wrap; gap: 5px; padding: 8px;
+      background: var(--bg-card); border: 1px solid var(--border-warm);
+      border-radius: 12px; margin-bottom: 8px; align-items: center; justify-content: space-between;
+    }
+    .tools-group-label { font-size: 11px; font-weight: 800; color: var(--brown-dark); margin-left: 4px; }
+
+    .type-selector { display: flex; gap: 8px; margin: 8px 0; }
+    .type-option {
+      flex: 1; border: 2px solid var(--border-warm); background: #FFF;
+      padding: 8px; border-radius: 10px; text-align: center; cursor: pointer;
+      font-size: 12px; font-weight: bold; color: var(--text-muted);
+    }
+    .type-option.selected { border-color: var(--brown-main); background: var(--caramel-light); color: var(--brown-dark); }
+
+    .subject-item { border: 1px solid var(--border-warm); border-radius: 12px; margin-bottom: 8px; overflow: hidden; background: #FFF; }
+    .subject-header {
+      background: var(--brown-main); color: #FFF; padding: 10px 12px; font-weight: bold; font-size: 14px;
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    }
+    .stages-list { padding: 8px; display: none; background: var(--bg-soft); }
+    .stages-list.open { display: block; }
+    .stage-row {
+      display: flex; justify-content: space-between; align-items: center; padding: 8px 10px;
+      background: #FFF; border: 1px solid var(--border-warm); border-radius: 10px; margin-bottom: 6px;
+    }
+    .stage-badge { font-size: 10px; padding: 3px 8px; border-radius: 10px; background: var(--caramel-light); color: var(--brown-dark); font-weight: bold; }
+
+    .schedule-table { width: 100%; border-collapse: collapse; table-layout: fixed; background: #FFF; }
+    .schedule-table th, .schedule-table td { border: 1px solid var(--border-warm); padding: 3px 2px; text-align: center; font-size: 11px; }
+    .schedule-table th { background: var(--brown-main); color: #FFF; padding: 5px 2px; }
+    .schedule-day-cell { background: var(--caramel-light); color: var(--brown-dark); font-weight: 800; width: 50px; font-size: 11px; }
+    .schedule-input { width: 100%; border: 1px solid transparent; background: transparent; text-align: center; font-size: 11px; padding: 2px 1px; color: var(--text-dark); font-weight: 600; }
+    .schedule-input:not(:disabled) { background: #FFF; border-color: var(--caramel); border-radius: 4px; }
+
+    .grades-zoom-wrapper { width: 100%; transform-origin: top center; transition: transform 0.15s ease; }
+    .grades-table { width: 100%; border-collapse: collapse; table-layout: fixed; background: #FFF; }
+    .grades-table th, .grades-table td { border: 1px solid var(--border-warm); padding: 2px 1px; text-align: center; vertical-align: middle; font-size: 9.5px; line-height: 1.15; }
+    .grades-table th { background: var(--brown-main); color: #FFF; font-weight: 700; padding: 4px 1px; word-wrap: break-word; }
+
+    .col-num { width: 4.5%; } .col-name { width: 17%; } .col-grade { width: 6.2%; } .col-avg { width: 6.2%; background: var(--bg-soft); font-weight: bold; } .col-act { width: 7%; }
+    .student-name-cell { font-size: 10px; font-weight: 700; color: var(--brown-dark); word-break: break-word; padding: 2px 3px !important; text-align: right !important; }
+
+    .grade-input {
+      width: 100% !important; height: 22px; padding: 0 !important; margin: 0 !important;
+      border: 1px solid #E2D2BE !important; border-radius: 4px !important; text-align: center !important;
+      font-size: 10.5px !important; font-weight: 800 !important; background: #FFF !important; color: var(--text-dark);
+      appearance: textfield; -moz-appearance: textfield;
+    }
+    .grade-input::-webkit-outer-spin-button, .grade-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .failing-grade { color: var(--danger-red) !important; background-color: var(--danger-bg) !important; border-color: #EF9A9A !important; font-weight: 900 !important; }
+    .tbl-btn { border: none; padding: 3px 2px; width: 95%; border-radius: 4px; font-size: 8.5px; font-weight: bold; color: #FFF; cursor: pointer; }
+    .tbl-btn.view { background: var(--brown-main); }
+    .tbl-btn.del { background: var(--danger-red); }
+
+    .official-doc-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--brown-main); padding-bottom: 6px; margin-bottom: 8px; font-size: 11px; color: var(--brown-dark); font-weight: bold;
+    }
+
+    .mini-box { background: #FFF; border: 1px solid var(--border-warm); border-radius: 12px; padding: 8px; }
+    .mini-box h4 { font-size: 12px; color: var(--brown-dark); border-bottom: 1px solid var(--caramel); padding-bottom: 4px; margin-bottom: 6px; }
+    .mini-list { list-style: none; font-size: 10.5px; max-height: 250px; overflow-y: auto; }
+    .mini-list li { display: flex; justify-content: space-between; align-items: center; padding: 3px 4px; border-bottom: 1px dashed var(--border-warm); gap: 4px; }
+    .tag-pos { color: var(--success-green); font-weight: bold; }
+    .tag-neg { color: var(--danger-red); font-weight: bold; }
+
+    @media print {
+      body { background: #FFF !important; padding: 0 !important; }
+      .app-wrapper { border: none !important; box-shadow: none !important; min-height: auto !important; }
+      .main-header, .top-nav, .tools-ribbon, .no-print { display: none !important; }
+      .grades-zoom-wrapper { transform: scale(1) !important; }
+      .card-box { border: none !important; box-shadow: none !important; padding: 0 !important; }
+      .grades-table th, .grades-table td, .schedule-table th, .schedule-table td { font-size: 11px !important; padding: 4px !important; border: 1px solid #000 !important; }
+      .grade-input, .schedule-input { border: none !important; font-size: 11px !important; }
+      .mini-box { border: 1px solid #000 !important; padding: 10px !important; }
+      .mini-list { max-height: none !important; overflow: visible !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-wrapper" id="appRoot">
+  <!-- الترويسة الفنية العليا (سجلّي) -->
+  <header class="main-header" id="mainHeader">
+    <div class="logo-circle">
+      <div class="logo-title">سجلّي</div>
+      <div class="logo-book-arc"></div>
+    </div>
+    <div class="teacher-divider">
+      <span>♦</span>
+      <span class="teacher-name-text" id="displayTeacherName">اسم الأستاذ</span>
+      <span>♦</span>
+    </div>
+    <div class="school-sub-info" id="displaySchoolInfo">اسم المعهد / المدرسة | السنة الدراسية</div>
+  </header>
+
+  <!-- شاشة إعدادات الأستاذ بملء الشاشة -->
+  <main class="screen" id="settingsScreen">
+    <div class="card-box">
+      <div class="section-title">⚙ بيانات الأستاذ والمدرسة</div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:2px solid var(--caramel); padding-bottom:8px;">
+      <span style="font-size:16px; font-weight:800; color:var(--brown-dark);">⚙ بيانات الأستاذ والمدرسة</span>
+      <button class="btn btn-danger btn-sm" onclick="openScreen('homeScreen')">✖</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">اسم الأستاذ:</label>
+      <input type="text" id="setTeacherName" placeholder="اكتب اسم الأستاذ هنا">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">اسم المدرسة / المعهد:</label>
+      <input type="text" id="setSchoolName" placeholder="اكتب اسم المدرسة / المعهد">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">السنة الدراسية:</label>
+      <select id="selectAcademicYear" onchange="onYearSelectChange()" style="width:100%;"></select>
+    </div>
+    <div style="margin-bottom:16px; background:#FFF; padding:8px; border-radius:10px; border:1px solid var(--border-warm);">
+      <label style="font-size:11px; font-weight:bold; display:block; margin-bottom:4px;">+ إضافة سنة جديدة:</label>
+      <div style="display:flex; gap:4px;">
+        <input type="text" id="newAcademicYearInput" placeholder="مثال: 2026 - 2027" style="font-size:12px;">
+        <button class="btn btn-caramel btn-sm" onclick="addOrUpdateAcademicYear()">إضافة</button>
+      </div>
+    </div>
+    <button class="btn btn-success" style="width:100%; padding:10px;" onclick="saveHeaderSettings()">✔ حفظ وتطبيق البيانات</button>
+
+    <hr style="margin:18px 0; border:none; border-top:1px dashed var(--border-warm);">
+    <div style="font-size:13px; font-weight:bold; margin-bottom:8px; color:var(--brown-dark);">النسخ الاحتياطي للتطبيق:</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <button class="btn" onclick="exportDataAsJSON()">⭳ تصدير نسخة كاملة (JSON)</button>
+      <label class="btn btn-caramel btn-sm" style="cursor:pointer; text-align:center;">
+        ⭱ استعادة نسخة كاملة
+        <input type="file" id="importJSONFile" accept=".json" style="display:none" onchange="importDataFromJSON(event)">
+      </label>
+    </div>
+    </div>
+  </main>
+
+  <!-- شاشة الرمز السري -->
+  <main class="screen" id="secretCodeScreen">
+    <div class="card-box">
+      <div class="section-title">🔐 إعداد الرمز السري</div>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">يُطلب هذا الرمز قبل حذف أي طالبة أو مادة. احتفظ به ولا تشاركه مع الآخرين.</p>
+      <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">الرمز السري الجديد أو الحالي:</label>
+      <input type="password" id="secretCodeInput" placeholder="أدخل رمزاً سرياً" autocomplete="new-password">
+      <button class="btn btn-success" style="width:100%; margin-top:10px;" onclick="saveSecretCode()">✔ حفظ الرمز السري</button>
+      <button class="btn btn-caramel" style="width:100%; margin-top:8px;" onclick="openScreen('homeScreen')">رجوع إلى الرئيسية</button>
+    </div>
+  </main>
+
+  <!-- شريط التنقل السفلي (أزرار التحكم) -->
+  <nav class="top-nav" id="topNav">
+    <button class="nav-btn secondary" id="btnBackHome" onclick="openScreen('homeScreen')" style="display:none;">⟵ رجوع</button>
+    <div style="flex:1; text-align:center;">
+      <span class="nav-btn" onclick="openScreen('homeScreen')" style="background:transparent; color:var(--brown-dark); border:1px solid var(--brown-main);">🏠 الرئيسية</span>
+    </div>
+    <div class="zoom-controls no-print" id="zoomControls" style="display:none;">
+      <span style="font-size:11px; font-weight:bold; color:var(--brown-dark);">التحجيم:</span>
+      <button class="zoom-btn" onclick="adjustZoom(0.05)">+</button>
+      <button class="zoom-btn" onclick="adjustZoom(-0.05)">-</button>
+    </div>
+  </nav>
+
+  <!-- الشاشة الرئيسية: الواجهة المبدئية التي تحتوي 3 أقسام -->
+  <main class="screen active" id="homeScreen">
+    <div class="home-cards-grid">
+      <!-- سجل درجات الطالبات -->
+      <div class="arch-card" onclick="openScreen('gradesScreen')">
+        <div class="arch-card-top"><div class="arch-icon-circle">✎</div></div>
+        <div class="arch-card-bottom">
+          <h3>سجل الدرجات</h3>
+          <span>إدارة التقييم والمواد</span>
+        </div>
+      </div>
+      <!-- جدول الحصص الأسبوعي -->
+      <div class="arch-card" onclick="openScreen('scheduleScreen')">
+        <div class="arch-card-top"><div class="arch-icon-circle">📅</div></div>
+        <div class="arch-card-bottom">
+          <h3>جدول الحصص</h3>
+          <span>الجدول الزمني الأسبوعي</span>
+        </div>
+      </div>
+      <!-- معلومات المعهد والمدرسة -->
+      <div class="arch-card" onclick="openScreen('settingsScreen')">
+        <div class="arch-card-top"><div class="arch-icon-circle">🏛</div></div>
+        <div class="arch-card-bottom">
+          <h3>إعدادات الأستاذ</h3>
+          <span>تعديل الاسم والمدرسة</span>
+        </div>
+      </div>
+      <div class="arch-card" onclick="openScreen('secretCodeScreen')">
+        <div class="arch-card-top"><div class="arch-icon-circle">🔐</div></div>
+        <div class="arch-card-bottom">
+          <h3>الرمز السري</h3>
+          <span>تعيين رمز الحماية وتغييره</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- شاشة 1: جدول الحصص الأسبوعي -->
+  <main class="screen" id="scheduleScreen">
+    <div class="card-box">
+      <div class="section-title">
+        جدول الحصص الأسبوعي
+        <div class="no-print">
+          <!-- زر المشاركة الموحد لجدول الحصص -->
+          <div class="share-dropdown">
+            <button class="btn btn-sm btn-caramel" onclick="toggleShareMenu('scheduleShareMenu')">🔗 مشاركة وتصدير ▼</button>
+            <div id="scheduleShareMenu" class="share-menu share-menu-left">
+              <button onclick="shareSection('scheduleArea', 'WhatsApp')">💬 مشاركة عبر واتساب</button>
+              <button onclick="shareSection('scheduleArea', 'Telegram')">✈ مشاركة عبر تلجرام</button>
+              <button onclick="window.print()">🖨 طباعة الجدول</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="scheduleArea" style="background:#FFF; padding:4px; border-radius:8px;">
+        <table class="schedule-table" id="scheduleTable">
+          <thead>
+            <tr>
+              <th class="schedule-day-cell" style="width:40px;">اليوم</th>
+              <th>المادة</th>
+              <th>المرحلة والقسم</th>
+              <th>الوقت</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleTbody">
+            <!-- سيتم توليد أوقات افتراضية قابلة للتعديل ومواد فارغة عبر الجافاسكربت -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- شاشة 2: سجل درجات الطالبات وإدارة المواد -->
+  <main class="screen" id="gradesScreen">
+    
+    <!-- قسم إضافة/تعديل المواد -->
+    <div class="card-box no-print" id="addSubjectSection">
+      <div class="section-title">إدارة المواد والمراحل</div>
+      <div class="form-grid">
+        <input type="text" id="subjectName" placeholder="اسم المادة (فارغ)">
+        <input type="text" id="stageName" placeholder="المرحلة (فارغ)">
+        <input type="text" id="sectionName" placeholder="القسم (فارغ)">
+      </div>
+      <div class="type-selector" id="subjectTypeSelector">
+        <div class="type-option selected" data-type="عملي" onclick="selectSubjectType('عملي')">عملي</div>
+        <div class="type-option" data-type="نظري" onclick="selectSubjectType('نظري')">نظري</div>
+      </div>
+      <button class="btn" style="width:100%; margin-top:4px;" onclick="addSubject()">+ إضافة المادة</button>
+    </div>
+
+    <!-- قائمة المواد المضافة (تكون فارغة افتراضياً) -->
+    <div id="subjectsListContainer" style="margin-bottom:12px;"></div>
+
+  </main>
+
+  <!-- شاشة منفصلة لتفاصيل سجل الدرجات -->
+  <main class="screen" id="gradesDetailScreen">
+    <!-- قسم عرض جدول الدرجات الخاص بمادة معينة -->
+    <div class="card-box" id="gradesTableSection" style="display:none;">
+      
+      <!-- شريط أدوات المشاركة والتصدير الخاص بجدول الدرجات الموحد -->
+      <div class="tools-ribbon no-print">
+        <div class="tools-group-label">خيارات الجدول الحالي:</div>
+        
+        <div class="share-dropdown">
+          <button class="btn btn-sm btn-caramel" onclick="toggleShareMenu('gradesShareMenu')">🔗 مشاركة وتصدير ▼</button>
+          <div id="gradesShareMenu" class="share-menu share-menu-left">
+            <button onclick="exportToImage('gradesArea')">🖼 تصدير صورة</button>
+            <button onclick="exportToPDF('gradesArea')">📄 تصدير PDF</button>
+            <button onclick="exportToExcel()">📊 تصدير Excel</button>
+            <button onclick="exportToWord()">📝 تصدير Word</button>
+            <button onclick="shareSection('gradesArea', 'WhatsApp')">💬 مشاركة واتساب</button>
+            <button onclick="shareSection('gradesArea', 'Telegram')">✈ مشاركة تلجرام</button>
+            <button onclick="window.print()">🖨 طباعة</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <span id="activeSubjectTitle">يرجى اختيار مادة</span>
+        <span style="font-size:11px; background:var(--caramel-light); padding:2px 8px; border-radius:10px;" id="activeSubjectTypeBadge"></span>
+      </div>
+
+      <!-- استيراد أسماء الطالبات -->
+      <div class="no-print" style="margin-bottom:10px; background:#FFF; border:1px solid var(--border-warm); padding:6px; border-radius:10px;">
+        <div style="font-size:11px; font-weight:bold; margin-bottom:6px; color:var(--brown-dark);">📥 استيراد أسماء الطالبات لهذه المادة:</div>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="singleStudentName" placeholder="الاسم الثلاثي للطالبة" style="flex:1;">
+          <button class="btn btn-caramel btn-sm" onclick="addSingleStudent()">+ إضافة طالبة</button>
+        </div>
+        <div style="text-align:center; margin:6px 0; font-size:10px; color:var(--text-muted);">أو</div>
+        <label class="btn btn-sm" style="width:100%; justify-content:center; background:var(--bg-soft); color:var(--brown-dark); border:1px dashed var(--brown-main); cursor:pointer;">
+          📄 استيراد ملف أسماء (Word / Excel / PDF)
+          <input type="file" id="importStudentsFile" accept=".docx,.xlsx,.xls,.pdf" style="display:none" onchange="importStudentsFromFile(event)">
+        </label>
+      </div>
+
+      <!-- جدول الدرجات الرئيسي للمادة المحددة -->
+      <div id="gradesArea" style="background:#FFF; padding:4px; border-radius:8px; overflow-x:auto;">
+        
+        <!-- ترويسة رسمية مصغرة تظهر في التصدير فقط -->
+        <div class="official-doc-header print-only-header" style="display:none;">
+          <div style="text-align:right;">
+            <div id="printTeacherName">-</div>
+            <div id="printSchoolInfo">-</div>
+          </div>
+          <div style="text-align:left;">
+            <div id="printSubjectInfo">المادة: - | المرحلة: -</div>
+            <div id="printAcademicYear">السنة الدراسية: -</div>
+          </div>
+        </div>
+
+        <div class="grades-zoom-wrapper" id="gradesZoomWrapper">
+          <table class="grades-table" id="gradesTable">
+            <thead>
+              <!-- سيتم توليد ترويسة الجدول ديناميكياً لتشمل الفصل الأول والثاني والنهائي -->
+            </thead>
+            <tbody id="gradesTbody">
+              <!-- سيتم توليد صفوف الطالبات هنا -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- شاشة منفصلة متكاملة لملف الطالبة (الحضور، السلوك، الملاحظات) -->
+  <main class="screen" id="studentProfileScreen">
+    <div class="card-box">
+      <!-- ترويسة ملف الطالبة وأزرار الرجوع -->
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--brown-main); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:16px; font-weight:900; color:var(--brown-dark);" id="profileStudentName">اسم الطالبة</h3>
+        <button class="btn btn-caramel btn-sm" onclick="openScreen('gradesDetailScreen')">⟵ رجوع للسجل</button>
+      </div>
+      
+      <!-- شريط أدوات المشاركة والتصدير الخاص بملف الطالبة -->
+      <div class="tools-ribbon no-print">
+        <div class="tools-group-label">خيارات الملف:</div>
+        
+        <div class="share-dropdown">
+          <button class="btn btn-sm btn-caramel" onclick="toggleShareMenu('studentShareMenu')">🔗 مشاركة وتصدير ▼</button>
+          <div id="studentShareMenu" class="share-menu share-menu-left">
+            <button onclick="exportToImage('studentProfileArea')">🖼 تصدير صورة</button>
+            <button onclick="exportToPDF('studentProfileArea', 'p')">📄 تصدير PDF</button>
+            <button onclick="shareSection('studentProfileArea', 'WhatsApp')">💬 مشاركة واتساب</button>
+            <button onclick="shareSection('studentProfileArea', 'Telegram')">✈ مشاركة تلجرام</button>
+            <button onclick="window.print()">🖨 طباعة</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- منطقة ملف الطالبة القابلة للطباعة والتصدير -->
+      <div id="studentProfileArea" style="background:#FFF; padding:10px; border-radius:12px;">
+        
+        <!-- ترويسة رسمية لملف الطالبة تظهر عند التصدير والطباعة فقط -->
+        <div class="official-doc-header print-only-header" style="display:none; margin-bottom:15px;">
+          <div style="text-align:right;">
+            <div id="printProfileTeacherName">-</div>
+            <div id="printProfileSchoolInfo">-</div>
+          </div>
+          <div style="text-align:left;">
+            <div id="printProfileStudentName">الطالبة: -</div>
+            <div id="printProfileSubjectInfo">المادة: - | المرحلة: -</div>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <!-- سجل الحضور والغياب -->
+          <div class="mini-box" style="margin-bottom:10px;">
+            <div class="no-print" style="display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="margin:0; border:none;">سجل الحضور والغياب</h4>
+              <input type="date" id="attendanceDate" class="schedule-input" style="width:110px; border:1px solid var(--border-warm); padding:4px;">
+            </div>
+            <div class="no-print" style="display:flex; gap:6px; margin-top:8px;">
+              <button class="btn btn-success btn-sm" style="flex:1;" onclick="addAttendanceRecord('حاضر')">✔ حاضر</button>
+              <button class="btn btn-danger btn-sm" style="flex:1;" onclick="addAttendanceRecord('غائب')">✖ غائب</button>
+              <button class="btn btn-caramel btn-sm" style="flex:1;" onclick="addAttendanceRecord('مجاز')">⚠ مجاز</button>
+            </div>
+            <!-- عنوان للطباعة يظهر فقط في التصدير -->
+            <h4 class="print-only-header" style="display:none; margin-top:10px; font-weight:bold; border-bottom:1px solid #000; padding-bottom:4px;">سجل الحضور والغياب</h4>
+            <ul class="mini-list" id="attendanceList" style="margin-top:8px;"></ul>
+          </div>
+
+          <!-- الملاحظات السلوكية -->
+          <div class="mini-box" style="margin-bottom:10px;">
+            <div class="no-print" style="display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="margin:0; border:none;">الملاحظات السلوكية</h4>
+              <input type="date" id="behaviorDate" class="schedule-input" style="width:110px; border:1px solid var(--border-warm); padding:4px;">
+            </div>
+            <div class="no-print" style="display:flex; gap:6px; margin-top:8px;">
+              <input type="text" id="behaviorNoteInput" placeholder="اكتب ملاحظة (مثال: مشاركة متميزة)" style="flex:1; padding:4px 6px;">
+              <button class="btn btn-sm" onclick="addBehaviorRecord(true)">+ إيجابي</button>
+              <button class="btn btn-danger btn-sm" onclick="addBehaviorRecord(false)">- سلبي</button>
+            </div>
+             <!-- عنوان للطباعة يظهر فقط في التصدير -->
+            <h4 class="print-only-header" style="display:none; margin-top:10px; font-weight:bold; border-bottom:1px solid #000; padding-bottom:4px;">الملاحظات السلوكية</h4>
+            <ul class="mini-list" id="behaviorList" style="margin-top:8px;"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  // تهيئة متغيرات التطبيق
+  let appData = {
+    teacherName: "",
+    schoolName: "",
+    secretCode: "",
+    academicYears: [],
+    currentYearIndex: 0,
+    subjects: [], // كل مادة تحتوي على: id, name, stage, section, type, students[]
+    schedule: []  // جدول الحصص الأسبوعي (أوقات ومواد)
+  };
+
+  let activeSubjectId = null;
+  let activeStudentId = null;
+  let currentZoom = 1;
+
+  // هيكلية أعمدة درجات الفصول
+  const gradesColumns = [
+    { id: 't1_m1', label: 'شهر1\n(ف1)', type: 'input' },
+    { id: 't1_m2', label: 'شهر2\n(ف1)', type: 'input' },
+    { id: 't1_avg', label: 'سعي\n(ف1)', type: 'calc' },
+    { id: 'mid', label: 'نصف\nالسنة', type: 'input' },
+    { id: 't2_m1', label: 'شهر1\n(ف2)', type: 'input' },
+    { id: 't2_m2', label: 'شهر2\n(ف2)', type: 'input' },
+    { id: 't2_avg', label: 'سعي\n(ف2)', type: 'calc' },
+    { id: 'year_avg', label: 'السعي\nالسنوي', type: 'calc' },
+    { id: 'final', label: 'النهائي', type: 'input' }
+  ];
+
+  // دالة تحديد درجة النجاح حسب نوع المادة (عملي = 60، نظري = 50)
+  function getPassingGrade(subjectType) {
+    return subjectType === 'عملي' ? 60 : 50;
+  }
+
+  // عند تحميل الصفحة
+  document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    setupHeaderSettings();
+    renderSubjectsList();
+    initScheduleTable();
+    
+    // تعيين تواريخ اليوم افتراضياً لحقول الحضور والسلوك
+    document.getElementById('attendanceDate').valueAsDate = new Date();
+    document.getElementById('behaviorDate').valueAsDate = new Date();
+  });
+
+  // التحكم بقوائم المشاركة المنسدلة
+  function toggleShareMenu(menuId) {
+    document.getElementById(menuId).classList.toggle('show');
+  }
+
+  // إغلاق القوائم المنسدلة عند النقر في أي مكان فارغ
+  window.onclick = function(event) {
+    if (!event.target.matches('.share-dropdown .btn')) {
+      var dropdowns = document.getElementsByClassName("share-menu");
+      for (var i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+          openDropdown.classList.remove('show');
+        }
+      }
+    }
+  }
+
+  // التنقل بين الشاشات
+  function openScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    
+    document.getElementById('btnBackHome').style.display = (screenId === 'homeScreen') ? 'none' : 'block';
+    document.getElementById('zoomControls').style.display = (screenId === 'gradesDetailScreen') ? 'flex' : 'none';
+    
+    if (screenId === 'gradesDetailScreen' && activeSubjectId) {
+      renderGradesTable();
+    }
+  }
+
+  // إدارة القائمة الجانبية (الإعدادات)
+
+  // تحميل وحفظ البيانات
+  function loadData() {
+    const saved = localStorage.getItem('sejelliData');
+    if (saved) {
+      try {
+        appData = JSON.parse(saved);
+        if(!appData.academicYears) appData.academicYears = [];
+        if(!appData.subjects) appData.subjects = [];
+        if(!appData.schedule) appData.schedule = [];
+        if(typeof appData.secretCode !== 'string') appData.secretCode = '';
+      } catch (e) {
+        console.error("خطأ في قراءة البيانات", e);
+      }
+    }
+    updateHeaderDisplay();
+  }
+
+  function saveData() {
+    localStorage.setItem('sejelliData', JSON.stringify(appData));
+  }
+
+  // إعدادات الأستاذ والمدرسة
+  function setupHeaderSettings() {
+    document.getElementById('setTeacherName').value = appData.teacherName || "";
+    document.getElementById('setSchoolName').value = appData.schoolName || "";
+    updateYearSelectDropdown();
+  }
+
+  function updateYearSelectDropdown() {
+    const select = document.getElementById('selectAcademicYear');
+    select.innerHTML = '';
+    if (appData.academicYears.length === 0) {
+      select.innerHTML = '<option value="">لا توجد سنوات مضافة</option>';
+    } else {
+      appData.academicYears.forEach((year, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = year;
+        if (index === appData.currentYearIndex) option.selected = true;
+        select.appendChild(option);
+      });
+    }
+  }
+
+  function addOrUpdateAcademicYear() {
+    const newYear = document.getElementById('newAcademicYearInput').value.trim();
+    if (newYear) {
+      appData.academicYears.push(newYear);
+      appData.currentYearIndex = appData.academicYears.length - 1;
+      document.getElementById('newAcademicYearInput').value = '';
+      updateYearSelectDropdown();
+      saveData();
+      alert("تمت إضافة السنة الدراسية بنجاح.");
+    }
+  }
+
+  function onYearSelectChange() {
+    const select = document.getElementById('selectAcademicYear');
+    if (select.value !== "") {
+      appData.currentYearIndex = parseInt(select.value);
+    }
+  }
+
+  function saveHeaderSettings() {
+    appData.teacherName = document.getElementById('setTeacherName').value.trim();
+    appData.schoolName = document.getElementById('setSchoolName').value.trim();
+    saveData();
+    updateHeaderDisplay();
+    openScreen('homeScreen');
+  }
+
+  function saveSecretCode() {
+    const code = document.getElementById('secretCodeInput').value.trim();
+    if (!code) { alert('يرجى إدخال الرمز السري.'); return; }
+    if (code.length < 4) { alert('يجب ألا يقل الرمز السري عن أربعة أحرف أو أرقام.'); return; }
+    if (appData.secretCode) {
+      const currentCode = prompt('أدخل الرمز السري الحالي للسماح بتغييره:');
+      if (currentCode === null) return;
+      if (currentCode !== appData.secretCode) { alert('الرمز الحالي غير صحيح، ولم يتم تغييره.'); return; }
+    }
+    appData.secretCode = code;
+    saveData();
+    document.getElementById('secretCodeInput').value = '';
+    alert('تم حفظ الرمز السري بنجاح.');
+    openScreen('homeScreen');
+  }
+
+  function updateHeaderDisplay() {
+    const activeYear = appData.academicYears[appData.currentYearIndex] ? ' | السنة الدراسية: ' + appData.academicYears[appData.currentYearIndex] : "";
+    const teacherDisplay = appData.teacherName || "اسم الأستاذ";
+    const schoolDisplay = appData.schoolName || "اسم المعهد / المدرسة";
+    
+    document.getElementById('displayTeacherName').textContent = teacherDisplay;
+    document.getElementById('displaySchoolInfo').textContent = schoolDisplay + activeYear;
+  }
+
+  // إدارة المواد
+  let selectedSubjectType = 'عملي';
+  function selectSubjectType(type) {
+    selectedSubjectType = type;
+    document.querySelectorAll('.type-option').forEach(el => el.classList.remove('selected'));
+    document.querySelector(`.type-option[data-type="${type}"]`).classList.add('selected');
+  }
+
+  function addSubject() {
+    const name = document.getElementById('subjectName').value.trim();
+    const stage = document.getElementById('stageName').value.trim();
+    const section = document.getElementById('sectionName').value.trim();
+    
+    if (!name || !stage) { alert("يرجى إدخال اسم المادة والمرحلة على الأقل."); return; }
+    
+    const newSub = {
+      id: Date.now().toString(),
+      name: name,
+      stage: stage,
+      section: section,
+      type: selectedSubjectType,
+      students: []
+    };
+    
+    appData.subjects.push(newSub);
+    saveData();
+    renderSubjectsList();
+    
+    // تفريغ الحقول
+    document.getElementById('subjectName').value = '';
+    document.getElementById('stageName').value = '';
+    document.getElementById('sectionName').value = '';
+  }
+
+  // دالة عرض قائمة المواد (تم دمج أزرار التعديل والحذف هنا)
+  function renderSubjectsList() {
+    const container = document.getElementById('subjectsListContainer');
+    container.innerHTML = '';
+    
+    if (appData.subjects.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#777; font-size:12px;">لا توجد مواد مضافة حالياً.</div>';
+      return;
+    }
+
+    // تجميع المواد حسب المرحلة
+    const subjectsByStage = {};
+    appData.subjects.forEach(sub => {
+      if(!subjectsByStage[sub.stage]) subjectsByStage[sub.stage] = [];
+      subjectsByStage[sub.stage].push(sub);
+    });
+
+    for (const [stage, subs] of Object.entries(subjectsByStage)) {
+      const item = document.createElement('div');
+      item.className = 'subject-item';
+      
+      const header = document.createElement('div');
+      header.className = 'subject-header';
+      header.innerHTML = `<span>المرحلة: ${stage}</span> <span style="font-size:10px;">▼</span>`;
+      header.onclick = () => {
+        const list = item.querySelector('.stages-list');
+        list.classList.toggle('open');
+      };
+
+      const listDiv = document.createElement('div');
+      listDiv.className = 'stages-list';
+      
+      subs.forEach(sub => {
+        const row = document.createElement('div');
+        row.className = 'stage-row';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-weight:bold; font-size:12px; color:var(--brown-dark);">${sub.name} <span class="stage-badge">${sub.type}</span></div>
+            <div style="font-size:10px; color:var(--text-muted);">القسم: ${sub.section || '-'}</div>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-sm" onclick="openGradesForSubject('${sub.id}')">فتح</button>
+            <button class="btn btn-sm btn-caramel" onclick="editSubject('${sub.id}')">تعديل</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteSubject('${sub.id}')">حذف</button>
+          </div>
+        `;
+        listDiv.appendChild(row);
+      });
+
+      item.appendChild(header);
+      item.appendChild(listDiv);
+      container.appendChild(item);
+    }
+  }
+
+  // دالة حذف المادة الجديدة
+  function deleteSubject(subId) {
+    if (!appData.secretCode) {
+      alert('يجب تعيين الرمز السري أولاً من أيقونة «الرمز السري» في الشاشة الرئيسية.');
+      openScreen('secretCodeScreen');
+      return;
+    }
+    const enteredCode = prompt('أدخل الرمز السري لتأكيد حذف المادة:');
+    if (enteredCode === null) return;
+    if (enteredCode !== appData.secretCode) { alert('الرمز السري غير صحيح. لم يتم حذف المادة.'); return; }
+    
+    if(confirm('هل أنت متأكد من حذف هذه المادة؟ سيتم حذف جميع أسماء الطالبات ودرجاتهن المرتبطة بها نهائياً.')) {
+      appData.subjects = appData.subjects.filter(s => s.id !== subId);
+      saveData();
+      renderSubjectsList();
+    }
+  }
+
+  // دالة تعديل المادة الجديدة
+  function editSubject(subId) {
+    const subject = appData.subjects.find(s => s.id === subId);
+    if(!subject) return;
+
+    const newName = prompt('تعديل اسم المادة:', subject.name);
+    if(newName === null) return; 
+
+    const newStage = prompt('تعديل المرحلة:', subject.stage);
+    if(newStage === null) return;
+
+    const newSection = prompt('تعديل القسم:', subject.section);
+    if(newSection === null) return;
+
+    if (newName.trim() === '' || newStage.trim() === '') {
+      alert('اسم المادة والمرحلة مطلوبان لإتمام التعديل.');
+      return;
+    }
+
+    subject.name = newName.trim();
+    subject.stage = newStage.trim();
+    subject.section = newSection.trim();
+
+    saveData();
+    renderSubjectsList();
+  }
+
+  // فتح جدول الدرجات لمادة معينة
+  function openGradesForSubject(subId) {
+    activeSubjectId = subId;
+    const subject = appData.subjects.find(s => s.id === subId);
+    
+    document.getElementById('activeSubjectTitle').textContent = `المادة: ${subject.name} | ${subject.stage} (${subject.section})`;
+    document.getElementById('activeSubjectTypeBadge').textContent = subject.type;
+    
+    // تجهيز الترويسة للطباعة
+    document.getElementById('printSubjectInfo').textContent = `المادة: ${subject.name} | المرحلة: ${subject.stage} ${subject.section ? '('+subject.section+')' : ''}`;
+    document.getElementById('printAcademicYear').textContent = `السنة الدراسية: ${appData.academicYears[appData.currentYearIndex] || '-'}`;
+    document.getElementById('printTeacherName').textContent = appData.teacherName || '-';
+    document.getElementById('printSchoolInfo').textContent = appData.schoolName || '-';
+
+    document.getElementById('gradesTableSection').style.display = 'block';
+    openScreen('gradesDetailScreen');
+    renderGradesTable();
+  }
+
+  // إضافة طالبة مفردة
+  function addSingleStudent() {
+    if (!activeSubjectId) return;
+    const nameInput = document.getElementById('singleStudentName');
+    const name = nameInput.value.trim();
+    if (!name) return;
+
+    const subject = appData.subjects.find(s => s.id === activeSubjectId);
+    subject.students.push({
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+      name: name,
+      grades: {},
+      attendance: [],
+      behavior: []
+    });
+    
+    nameInput.value = '';
+    saveData();
+    renderGradesTable();
+  }
+
+  function importStudentsFromFile(event) {
+    const file = event.target.files[0];
+    if (!file || !activeSubjectId) return;
+    alert(`سيتم استيراد الأسماء من ملف: ${file.name}\n(ملاحظة: هذه ميزة محاكاة في هذه النسخة)`);
+  }
+
+  // بناء وعرض جدول الدرجات
+  function renderGradesTable() {
+    const subject = appData.subjects.find(s => s.id === activeSubjectId);
+    const thead = document.querySelector('#gradesTable form-grid') || document.querySelector('#gradesTable thead');
+    const tbody = document.getElementById('gradesTbody');
+    
+    // بناء الترويسة
+    let theadHTML = `<tr><th class="col-num">ت</th><th class="col-name" style="text-align:right !important; padding-right:5px !important;">الاسم الثلاثي</th>`;
+    gradesColumns.forEach(col => {
+      theadHTML += `<th class="${col.type === 'calc' ? 'col-avg' : 'col-grade'}">${col.label.replace('\n', '<br>')}</th>`;
+    });
+    theadHTML += `<th class="col-act no-print">إجراء</th></tr>`;
+    thead.innerHTML = theadHTML;
+
+    // بناء الصفوف
+    tbody.innerHTML = '';
+    
+    if (!subject.students || subject.students.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="${gradesColumns.length + 3}" style="padding:15px; color:#777;">لا توجد طالبات مضافات في هذه المادة.</td></tr>`;
+      return;
+    }
+
+    const passingGrade = getPassingGrade(subject.type);
+
+    subject.students.forEach((student, index) => {
+      let rowHTML = `<tr>
+        <td>${index + 1}</td>
+        <td class="student-name-cell">${student.name}</td>`;
+      
+      gradesColumns.forEach(col => {
+        let val = student.grades[col.id] !== undefined ? student.grades[col.id] : '';
+        let isFailClass = (val !== '' && parseFloat(val) < passingGrade) ? 'failing-grade' : '';
+        
+        if (col.type === 'input') {
+          // inputmode="numeric" و maxlength يسمح بإدخال الأرقام بسهولة وعدم فقدان التركيز
+          rowHTML += `<td>
+            <input type="text" inputmode="numeric" maxlength="3" class="grade-input ${isFailClass}" 
+                   data-studentid="${student.id}" data-colid="${col.id}" 
+                   value="${val}" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                   onchange="updateGrade(this, '${student.id}', '${col.id}')">
+          </td>`;
+        } else {
+           rowHTML += `<td class="col-avg ${isFailClass}" id="calc_${student.id}_${col.id}">${val}</td>`;
+        }
+      });
+      
+      rowHTML += `<td class="no-print">
+        <div style="display:flex; flex-direction:column; gap:2px; align-items:center;">
+          <button class="tbl-btn view" onclick="openStudentProfile('${student.id}')">الملف</button>
+          <button class="tbl-btn del" onclick="deleteStudent('${student.id}')">حذف</button>
+        </div>
+      </td></tr>`;
+      
+      tbody.innerHTML += rowHTML;
+    });
+  }
+
+  // يتم حفظ وتحديث الدرجة عند الانتقال للحقل التالي (بدون إعادة بناء الجدول لتجنب خروج لوحة الأرقام)
+  function updateGrade(inputElement, studentId, colId) {
+    const subject = appData.subjects.find(s => s.id === activeSubjectId);
+    const student = subject.students.find(s => s.id === studentId);
+    const val = inputElement.value;
+    
+    if (val === '') {
+      delete student.grades[colId];
+    } else {
+      student.grades[colId] = parseFloat(val);
+    }
+    
+    // تلوين الرسوب مباشرة على الحقل
+    const passingGrade = getPassingGrade(subject.type);
+    if (val !== '' && parseFloat(val) < passingGrade) {
+      inputElement.classList.add('failing-grade');
+    } else {
+      inputElement.classList.remove('failing-grade');
+    }
+
+    // حساب المعدلات التلقائية
+    calculateAverages(student, subject.type);
+    saveData();
+  }
+
+  function calculateAverages(student, subjectType) {
+    const passingGrade = getPassingGrade(subjectType);
+    
+    // حساب سعي ف1
+    let t1Avg = '';
+    if(student.grades['t1_m1'] !== undefined && student.grades['t1_m2'] !== undefined) {
+      t1Avg = Math.round((student.grades['t1_m1'] + student.grades['t1_m2']) / 2);
+      student.grades['t1_avg'] = t1Avg;
+      updateCalcCell(student.id, 't1_avg', t1Avg, passingGrade);
+    }
+    
+    // حساب سعي ف2
+    let t2Avg = '';
+    if(student.grades['t2_m1'] !== undefined && student.grades['t2_m2'] !== undefined) {
+      t2Avg = Math.round((student.grades['t2_m1'] + student.grades['t2_m2']) / 2);
+      student.grades['t2_avg'] = t2Avg;
+      updateCalcCell(student.id, 't2_avg', t2Avg, passingGrade);
+    }
+
+    // حساب السعي السنوي
+    if(t1Avg !== '' && student.grades['mid'] !== undefined && t2Avg !== '') {
+      let yearAvg = Math.round((t1Avg + student.grades['mid'] + t2Avg) / 3);
+      student.grades['year_avg'] = yearAvg;
+      updateCalcCell(student.id, 'year_avg', yearAvg, passingGrade);
+    }
+  }
+
+  function updateCalcCell(studentId, colId, val, passingGrade) {
+    const cell = document.getElementById(`calc_${studentId}_${colId}`);
+    if (cell) {
+      cell.textContent = val;
+      if (val !== '' && parseFloat(val) < passingGrade) {
+        cell.classList.add('failing-grade');
+      } else {
+        cell.classList.remove('failing-grade');
+      }
+    }
+  }
+
+  function deleteStudent(studentId) {
+    if (!appData.secretCode) {
+      alert('يجب تعيين الرمز السري أولاً من أيقونة «الرمز السري» في الشاشة الرئيسية.');
+      openScreen('secretCodeScreen');
+      return;
+    }
+    const enteredCode = prompt('أدخل الرمز السري لتأكيد حذف الطالبة:');
+    if (enteredCode === null) return;
+    if (enteredCode !== appData.secretCode) { alert('الرمز السري غير صحيح. لم يتم حذف الطالبة.'); return; }
+    if(confirm('هل أنت متأكد من حذف هذه الطالبة؟ لا يمكن التراجع عن الحذف.')) {
+      const subject = appData.subjects.find(s => s.id === activeSubjectId);
+      subject.students = subject.students.filter(s => s.id !== studentId);
+      saveData();
+      renderGradesTable();
+    }
+  }
+
+  // ملف الطالبة في شاشة كاملة (الحضور والسلوك)
+  function openStudentProfile(studentId) {
+    activeStudentId = studentId;
+    const subject = appData.subjects.find(s => s.id === activeSubjectId);
+    const student = subject.students.find(s => s.id === studentId);
+    
+    document.getElementById('profileStudentName').textContent = student.name;
+    
+    // تجهيز الترويسة للطباعة لملف الطالبة
+    document.getElementById('printProfileStudentName').textContent = `الطالبة: ${student.name}`;
+    document.getElementById('printProfileSubjectInfo').textContent = `المادة: ${subject.name} | المرحلة: ${subject.stage}`;
+    document.getElementById('printProfileTeacherName').textContent = appData.teacherName || '-';
+    document.getElementById('printProfileSchoolInfo').textContent = appData.schoolName || '-';
+
+    renderAttendanceList(student);
+    renderBehaviorList(student);
+    
+    // فتح واجهة ملف الطالبة كشاشة كاملة
+    openScreen('studentProfileScreen');
+  }
+
+  function addAttendanceRecord(status) {
+    if(!activeStudentId) return;
+    const subject = appData.subjects.find(s => s.id === activeSubjectId);
+    const student = subject.students.find(s => s.id === activeStudentId);
+    // الحصول على التاريخ من حقل التاريخ المعدل
+    const dateVal = document.getElementById('attendanceDate').value;
+    if(!dateVal) { alert("يرجى تحديد التاريخ"); return; }
+    
+    if(!student.attendance) student.attendance = [];
+    student.attendance.push({ date: dateVal, status: status });
+    saveData();
+    renderAttendanceList(student);
+  }
+
+  function renderAttendanceList(student) {
+    const list = document.getElementById('attendanceList');
+    list.innerHTML = '';
+    if(student.attendance) {
+      // عكس الترتيب ليظهر الأحدث أولاً
+      [...student.attendance].reverse().forEach((rec, idx) => {
+        let color = rec.status === 'حاضر' ? 'var(--success-green)' : (rec.status === 'غائب' ? 'var(--danger-red)' : 'var(--caramel)');
+        list.innerHTML += `<li><span style="font-size:10px;">${rec.date}</span> <strong style="color:${color}">${rec.status}</strong></li>`;
+      });
+    }
+  }
+
+  function addBehaviorRecord(isPositive) {
+    if(!activeStudentId) return;
+    const note = document.getElementById('behaviorNoteInput').value.trim();
+    if(!note) return;
+    const dateVal = document.getElementById('behaviorDate').value;
+    if(!dateVal) { alert("يرجى تحديد التاريخ"); return; }
+
+    const subject = appData.subjects.find(s => s.id === activeSubjectId);
+    const student = subject.students.find(s => s.id === activeStudentId);
+    
+    if(!student.behavior) student.behavior = [];
+    student.behavior.push({ date: dateVal, note: note, type: isPositive ? 'positive' : 'negative' });
+    
+    document.getElementById('behaviorNoteInput').value = '';
+    saveData();
+    renderBehaviorList(student);
+  }
+
+  function renderBehaviorList(student) {
+    const list = document.getElementById('behaviorList');
+    list.innerHTML = '';
+    if(student.behavior) {
+      [...student.behavior].reverse().forEach((rec, idx) => {
+        let tagClass = rec.type === 'positive' ? 'tag-pos' : 'tag-neg';
+        let icon = rec.type === 'positive' ? '✓ إيجابي' : '✕ سلبي';
+        list.innerHTML += `<li>
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:9px; color:#999;">${rec.date}</span>
+            <span>${rec.note}</span>
+          </div>
+          <span class="${tagClass}">${icon}</span>
+        </li>`;
+      });
+    }
+  }
+
+  // جدول الحصص الأسبوعي (أوقات ومواد قابلة للتعديل بحرية)
+  const defaultTimes = ["08:30 - 10:00", "10:00 - 11:30", "11:30 - 01:00"];
+  const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
+
+  function initScheduleTable() {
+    const tbody = document.getElementById('scheduleTbody');
+    tbody.innerHTML = '';
+    
+    // إنشاء الهيكلية فارغة المواد والمراحل كطلبك إذا لم تكن موجودة
+    if(!appData.schedule || appData.schedule.length === 0) {
+      appData.schedule = [];
+      days.forEach(day => {
+        let dayObj = { day: day, slots: [] };
+        defaultTimes.forEach(time => {
+          dayObj.slots.push({ time: time, stage: "", subject: "" });
+        });
+        appData.schedule.push(dayObj);
+      });
+      saveData();
+    }
+
+    // بناء الجدول
+    appData.schedule.forEach((dayObj, dayIndex) => {
+      dayObj.slots.forEach((slot, slotIndex) => {
+        const tr = document.createElement('tr');
+        
+        if (slotIndex === 0) {
+          const tdDay = document.createElement('td');
+          tdDay.className = 'schedule-day-cell';
+          tdDay.rowSpan = dayObj.slots.length;
+          tdDay.textContent = dayObj.day;
+          tr.appendChild(tdDay);
+        }
+
+        tr.innerHTML += `
+          <td><input type="text" class="schedule-input" value="${slot.subject}" placeholder="المادة" onchange="updateSchedule(${dayIndex}, ${slotIndex}, 'subject', this.value)"></td>
+          <td><input type="text" class="schedule-input" value="${slot.stage}" placeholder="المرحلة والقسم" onchange="updateSchedule(${dayIndex}, ${slotIndex}, 'stage', this.value)"></td>
+          <td><input type="text" class="schedule-input" value="${slot.time}" onchange="updateSchedule(${dayIndex}, ${slotIndex}, 'time', this.value)"></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+  }
+
+  function updateSchedule(dayIndex, slotIndex, field, value) {
+    appData.schedule[dayIndex].slots[slotIndex][field] = value;
+    saveData();
+  }
+
+  // التكبير والتصغير لجدول الدرجات
+  function adjustZoom(step) {
+    currentZoom += step;
+    if(currentZoom < 0.5) currentZoom = 0.5;
+    if(currentZoom > 1.5) currentZoom = 1.5;
+    document.getElementById('gradesZoomWrapper').style.transform = `scale(${currentZoom})`;
+  }
+
+  // أدوات التصدير والمشاركة الشاملة (تستقبل معرف القسم areaId)
+  function prepareForExport(areaId) {
+    const area = document.getElementById(areaId);
+    
+    const officialHeaders = area.querySelectorAll('.print-only-header');
+    officialHeaders.forEach(el => el.style.display = 'flex');
+
+    const inputs = area.querySelectorAll('input');
+    inputs.forEach(input => {
+      const span = document.createElement('span');
+      span.className = 'temp-export-span';
+      span.textContent = input.value;
+      span.style.fontSize = input.style.fontSize || '10px';
+      span.style.fontWeight = 'bold';
+      if(input.classList.contains('failing-grade')) span.style.color = 'red';
+      input.style.display = 'none';
+      input.parentNode.insertBefore(span, input);
+    });
+
+    return { officialHeaders, inputs };
+  }
+
+  function revertAfterExport(areaId, { officialHeaders, inputs }) {
+    const area = document.getElementById(areaId);
+    officialHeaders.forEach(el => el.style.display = 'none');
+    const spans = area.querySelectorAll('.temp-export-span');
+    spans.forEach(span => span.remove());
+    inputs.forEach(input => input.style.display = 'inline-block');
+  }
+
+  async function exportToImage(areaId) {
+    const state = prepareForExport(areaId);
+    const el = document.getElementById(areaId);
+    
+    let oldTransform = "";
+    const zoomWrapper = document.getElementById('gradesZoomWrapper');
+    if(areaId === 'gradesArea' && zoomWrapper) {
+       oldTransform = zoomWrapper.style.transform;
+       zoomWrapper.style.transform = 'scale(1)';
+    }
+    
+    try {
+      const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#FFF' });
+      const link = document.createElement('a');
+      link.download = `سجلي_تصدير_${Date.now()}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    } finally {
+      if(areaId === 'gradesArea' && zoomWrapper) {
+         zoomWrapper.style.transform = oldTransform;
+      }
+      revertAfterExport(areaId, state);
+    }
+  }
+
+  async function exportToPDF(areaId, orientation = 'l') {
+    const state = prepareForExport(areaId);
+    const el = document.getElementById(areaId);
+    
+    let oldTransform = "";
+    const zoomWrapper = document.getElementById('gradesZoomWrapper');
+    if(areaId === 'gradesArea' && zoomWrapper) {
+       oldTransform = zoomWrapper.style.transform;
+       zoomWrapper.style.transform = 'scale(1)';
+    }
+
+    try {
+      const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#FFF' });
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const { jsPDF } = window.jspdf;
+      
+      const pdf = new jsPDF(orientation, 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'JPEG', 0, 10, pdfWidth, pdfHeight);
+      pdf.save(`سجلي_تصدير_${Date.now()}.pdf`);
+    } finally {
+      if(areaId === 'gradesArea' && zoomWrapper) {
+         zoomWrapper.style.transform = oldTransform;
+      }
+      revertAfterExport(areaId, state);
+    }
+  }
+
+  function exportToExcel() {
+    const state = prepareForExport('gradesArea');
+    const actCols = document.querySelectorAll('.col-act, .no-print');
+    const oldDisplays = [];
+    actCols.forEach(col => { oldDisplays.push(col.style.display); col.style.display = 'none'; });
+
+    try {
+      const table = document.getElementById('gradesTable');
+      const wb = XLSX.utils.table_to_book(table, { sheet: "الدرجات" });
+      XLSX.writeFile(wb, `سجل_درجات_${Date.now()}.xlsx`);
+    } finally {
+      actCols.forEach((col, idx) => col.style.display = oldDisplays[idx]);
+      revertAfterExport('gradesArea', state);
+    }
+  }
+
+  function exportToWord() {
+    alert("تصدير Word يتطلب إعداد قالب مخصص على الخادم. يمكنك تصدير Excel أو PDF كبديل مثالي.");
+  }
+
+  function shareSection(areaId, platform) {
+    alert(`سيتم مشاركة القسم عبر ${platform} (في بيئة الموبايل الحقيقية سيفتح تطبيق ${platform} مباشرة)`);
+  }
+
+  // النسخ الاحتياطي (استيراد وتصدير JSON)
+  function exportDataAsJSON() {
+    const dataStr = JSON.stringify(appData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sejelli_backup_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importDataFromJSON(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if(confirm("هل أنت متأكد من استعادة هذه النسخة؟ سيتم مسح البيانات الحالية.")){
+          appData = imported;
+          saveData();
+          location.reload();
+        }
+      } catch(err) {
+        alert("ملف غير صالح.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then((reg) => console.log('Service Worker registered', reg))
+      .catch((err) => console.log('Service Worker not registered', err));
+  }
+</script>
+
+</body>
+</html>
